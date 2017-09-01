@@ -5,3 +5,7 @@ authors = ["naokirin <naoki.rin186@gmail.com>"]
 
 [dependencies]
 serde_json = "1.0"
+
+[[bench]]
+name = "bench"
+path = "benches/bench.rs"
