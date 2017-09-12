@@ -1,5 +1,18 @@
+extern crate glob;
+
 use std::io::{Read, BufReader, Error};
 use std::fs::File;
+use self::glob::glob;
+
+pub fn read_glob(pattern: &str) -> Vec<String> {
+    let matches = glob(pattern);
+    match matches {
+        Ok(paths) =>
+            return paths.map(|path| path.unwrap().to_str().unwrap().to_string())
+                        .collect::<Vec<String>>(),
+        Err(_) => return Vec::new()
+    }
+}
 
 pub fn read(path: &str) -> Result<String, Error> {
     let f = File::open(path)?;
