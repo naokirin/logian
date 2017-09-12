@@ -4,7 +4,8 @@ version = "0.1.0"
 authors = ["naokirin <naoki.rin186@gmail.com>"]
 
 [dependencies]
-serde_json = "1.0"
+serde_json = "*"
+glob = "*"
 
 [[bench]]
 name = "bench"
