@@ -4,3 +4,4 @@ extern crate serde_derive;
 pub mod file;
 pub mod json;
 pub mod schema;
+pub mod template;
