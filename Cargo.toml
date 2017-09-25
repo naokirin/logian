@@ -4,7 +4,10 @@ version = "0.1.0"
 authors = ["naokirin <naoki.rin186@gmail.com>"]
 
 [dependencies]
+serde = "*"
+serde_derive = "*"
 serde_json = "*"
+tera = "*"
 glob = "*"
 
 [[bench]]
