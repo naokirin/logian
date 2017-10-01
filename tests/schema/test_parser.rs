@@ -21,6 +21,20 @@ pub fn test_parse_one_field_schema() {
     assert_eq!(log_name, actual.name);
     assert_eq!("field1", actual.fields[0].name);
     assert_eq!(DataType::String, actual.fields[0].data_type);
+    assert_eq!(TypeAttribute::None, actual.fields[0].type_attribute);
+}
+
+#[test]
+pub fn test_parse_nullable_field() {
+    let json = r#"[
+        { "name": "field1", "type": "string", "nullable": true }
+    ]"#;
+    let log_name = "log_name";
+    let actual = parse_log_schema(log_name, json, &vec![]);
+    assert_eq!(log_name, actual.name);
+    assert_eq!("field1", actual.fields[0].name);
+    assert_eq!(DataType::String, actual.fields[0].data_type);
+    assert_eq!(TypeAttribute::Nullable, actual.fields[0].type_attribute);
 }
 
 #[test]

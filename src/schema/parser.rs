@@ -47,8 +47,11 @@ fn parse_field(log_name: &str, value: &Map<String, Value>, user_defined_types: &
     let t = t.as_str().unwrap();
     let data_type = parse_data_type(t, user_defined_types);
 
-    // TODO: aquire type_attribute from schema json
-    Field { name: n.to_string(), data_type: data_type, type_attribute: TypeAttribute::None }
+    let mut attribute = TypeAttribute::None;
+    if value.contains_key("nullable") && value["nullable"].as_bool().unwrap() {
+        attribute = TypeAttribute::Nullable;
+    }
+    Field { name: n.to_string(), data_type: data_type, type_attribute: attribute }
 }
 
 fn parse_fields(log_name: &str, json_value: &Value, user_defined_types: &Vec<DataType>) -> Vec<Field> {
