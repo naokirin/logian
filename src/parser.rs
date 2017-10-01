@@ -1,10 +1,5 @@
 use std::path::Path;
 
-use ::file::*;
-use ::template::*;
-use ::schema::*;
-use ::json::*;
-
 pub fn parse_user_defined_types(template_dir: &str) -> Vec<::schema::data_type::DataType> {
     let type_files = ::file::reader::read_glob(&format!("{}/**/*.json", template_dir)[..]);
     type_files.into_iter().map(|path| {
