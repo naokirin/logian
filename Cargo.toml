@@ -9,6 +9,8 @@ serde_derive = "*"
 serde_json = "*"
 tera = "*"
 glob = "*"
+docopt = "*"
+docopt_macros = "*"
 
 [[bench]]
 name = "bench"
