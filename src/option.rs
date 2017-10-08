@@ -2,14 +2,15 @@ extern crate docopt;
 
 docopt!(pub Args derive Debug, "
 Usage:
-  logian output <plugin> <schema-dir> <output-dir>
+  logian output <plugin> <schema-dir> <output-dir> [--plugin-dir=<pd>]
   logian generate (log|type) <log-name> [<field>...]
   logian (-h | --help)
   logian --version
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
+  -h --help         Show this screen.
+  --version         Show version.
+  --plugin-dir=<pd>  Plugin directory [default: ].
 ");
 
 pub fn parse() -> Args {
@@ -20,6 +21,7 @@ pub struct Output {
     pub plugin_name: String,
     pub schema_dir: String,
     pub output_dir: String,
+    pub plugin_dir: String,
 }
 
 pub struct GeneratedField {
@@ -53,6 +55,7 @@ impl Args {
             plugin_name: self.arg_plugin.clone(),
             schema_dir: self.arg_schema_dir.clone(),
             output_dir: self.arg_output_dir.clone(),
+            plugin_dir: self.flag_plugin_dir.to_string(),
         })
     }
 
