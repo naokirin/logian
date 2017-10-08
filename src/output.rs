@@ -1,6 +1,5 @@
 extern crate tera;
 use self::tera::Tera;
-use std::env;
 
 type UserDefinedTypes = Vec<::schema::data_type::DataType>;
 type LogSchemas = Vec<::schema::data_type::LogSchema>;
@@ -61,15 +60,7 @@ impl LogianOutput {
         let types = ::parser::parse_user_defined_types(&format!("{}/types", self.schema_dir)[..]);
         let log_schemas = ::parser::parse_log_schemas(&format!("{}/schemas/logs", self.schema_dir)[..], &types);
         let default_schema = ::parser::parse_default_log_schema(&format!("{}/schemas/default.json", self.schema_dir)[..], &types);
-
-        let mut plugin_dir = self.plugin_dir.clone();
-        if plugin_dir.is_empty() {
-            let exe_path = env::current_exe().unwrap();
-            let exe_dir = exe_path.parent().unwrap();
-            plugin_dir = exe_dir.clone().join("plugin").to_str().unwrap().to_string();
-        }
-
-        let tera = ::template::generator::find_templates(&plugin_dir[..], &self.plugin_name[..]);
+        let tera = ::template::generator::find_templates(&self.plugin_dir[..], &self.plugin_name[..]);
 
         if self.compiled {
             self.output_compiled_file(&tera, &types, &log_schemas, &default_schema);

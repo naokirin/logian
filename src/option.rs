@@ -1,4 +1,5 @@
 extern crate docopt;
+use std::env;
 
 docopt!(pub Args derive Debug, "
 Usage:
@@ -51,11 +52,18 @@ impl Args {
             return Option::None;
         }
 
+        let mut plugin_dir = self.flag_plugin_dir.to_string();
+        if plugin_dir.is_empty() {
+            let exe_path = env::current_exe().unwrap();
+            let exe_dir = exe_path.parent().unwrap();
+            plugin_dir = exe_dir.clone().join("plugin").to_str().unwrap().to_string();
+        }
+
         Some(Output {
             plugin_name: self.arg_plugin.clone(),
             schema_dir: self.arg_schema_dir.clone(),
             output_dir: self.arg_output_dir.clone(),
-            plugin_dir: self.flag_plugin_dir.to_string(),
+            plugin_dir: plugin_dir,
         })
     }
 

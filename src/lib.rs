@@ -11,3 +11,4 @@ pub mod template;
 pub mod parser;
 pub mod option;
 pub mod output;
+pub mod plugin;
