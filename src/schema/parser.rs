@@ -1,7 +1,7 @@
 extern crate serde_json;
 
 use self::serde_json::*;
-use ::json::parser::*;
+use ::json;
 use ::schema::data_type::*;
 
 fn parse_field_user_defined_type(data_type_name: &str, user_defined_types: &Vec<DataType>) -> DataType {
@@ -71,13 +71,13 @@ fn parse_fields(log_name: &str, json_value: &Value, user_defined_types: &Vec<Dat
 }
 
 pub fn parse_log_schema(name: &str, json: &str, user_defined_types: &Vec<DataType>) -> LogSchema {
-    let parsed = parse_json(json);
+    let parsed = json::parse(json);
     let fields = parse_fields(name, &parsed, user_defined_types);
     LogSchema { name: name.to_string(), fields: fields }
 }
 
 pub fn parse_default_log_schema(json: &str, user_defined_types: &Vec<DataType>) -> DefaultLogSchema {
-    let parsed = parse_json(json);
+    let parsed = json::parse(json);
     if !parsed.is_object() {
         panic!("default_schema json root is not an object.");
     }
@@ -97,7 +97,7 @@ pub fn parse_default_log_schema(json: &str, user_defined_types: &Vec<DataType>) 
 }
 
 pub fn parse_user_defined_type(name: &str, json: &str) -> DataType {
-    let parsed = parse_json(json);
+    let parsed = json::parse(json);
     let fields = parse_fields(name, &parsed, &vec![]);
     DataType::Struct(name.to_string(), fields)
 }
