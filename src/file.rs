@@ -1,6 +1,6 @@
 extern crate glob;
 
-use std::io::{Read, BufReader, Error};
+use std::io::{Read, BufReader, Write, BufWriter, Error};
 use std::fs::File;
 use self::glob::glob;
 
@@ -25,4 +25,14 @@ pub fn read_file(f: File) -> Result<String, Error> {
     reader.read_to_string(&mut content)?;
     let result = content.clone();
     return Ok(result);
+}
+
+pub fn write(path: &str, data: &str) -> Result<(), Error> {
+    let f = File::create(path)?;
+    return write_file(f, data);
+}
+
+pub fn write_file(f: File, data: &str) -> Result<(), Error> {
+    let mut writer = BufWriter::new(f);
+    return writer.write_all(data.as_bytes());
 }

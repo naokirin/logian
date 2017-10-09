@@ -43,7 +43,7 @@ fn parse_file_name_case(s: &String) -> FileNameCase {
 pub fn parse_setting(plugin_dir: &String, plugin_name: &String) -> Setting {
     let path = Path::new(&plugin_dir[..]).join(&plugin_name[..]).join("config.json");
     let path = path.to_str().unwrap();
-    let json_file = ::file::reader::read(&path[..]).unwrap();
+    let json_file = ::file::read(&path[..]).unwrap();
     let json = ::json::parser::parse_json(&json_file[..]);
     let libs = &json["libs"];
     if !libs.is_array() {

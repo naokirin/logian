@@ -3,6 +3,6 @@ use self::logian::file;
 
 #[test]
 pub fn test_read_no_file() {
-    assert!(file::reader::read("").is_err());
+    assert!(file::read("").is_err());
 }
 
