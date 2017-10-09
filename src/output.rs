@@ -32,8 +32,8 @@ impl LogianOutput {
         log_schemas: &LogSchemas,
         default_schema: &DefaultLogSchema
     ) {
-        let logs = ::template::generator::render_logs(tera, LOGS_TEMPLATE, log_schemas, default_schema, types);
-        let data_types = ::template::generator::render_types(tera, TYPES_TEMPLATE, types);
+        let logs = ::template::renderer::render_logs(tera, LOGS_TEMPLATE, log_schemas, default_schema, types);
+        let data_types = ::template::renderer::render_types(tera, TYPES_TEMPLATE, types);
 
         let logs_file_name = ::plugin::convert_case(&self.logs_file_name, &self.file_name_case);
         let types_file_name = ::plugin::convert_case(&self.types_file_name, &self.file_name_case);
@@ -50,13 +50,13 @@ impl LogianOutput {
         default_schema: &DefaultLogSchema,
     ) {
         for schema in log_schemas.iter() {
-            let log = ::template::generator::render_log(tera, LOG_TEMPLATE, &schema, default_schema, types);
+            let log = ::template::renderer::render_log(tera, LOG_TEMPLATE, &schema, default_schema, types);
             let name = ::plugin::convert_case(&schema.name, &self.file_name_case);
             let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, name, self.file_suffix)[..], &log[..]);
         }
 
         for user_defined_type in types.iter() {
-            let data_type = ::template::generator::render_type(tera, TYPE_TEMPLATE, &user_defined_type);
+            let data_type = ::template::renderer::render_type(tera, TYPE_TEMPLATE, &user_defined_type);
             let name = ::plugin::convert_case(&user_defined_type.name(), &self.file_name_case);
             let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, name, self.file_suffix)[..], &data_type[..]);
         }
@@ -67,7 +67,7 @@ impl LogianOutput {
         let types = ::parser::parse_user_defined_types(&format!("{}/types", self.schema_dir)[..]);
         let log_schemas = ::parser::parse_log_schemas(&format!("{}/schemas/logs", self.schema_dir)[..], &types);
         let default_schema = ::parser::parse_default_log_schema(&format!("{}/schemas/default.json", self.schema_dir)[..], &types);
-        let mut tera = ::template::generator::find_templates(&self.plugin_dir[..], &self.plugin_name[..]);
+        let mut tera = ::template::renderer::find_templates(&self.plugin_dir[..], &self.plugin_name[..]);
         ::template::filter::register(&mut tera);
 
         if self.compiled {
