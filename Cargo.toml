@@ -12,6 +12,7 @@ glob = "*"
 docopt = "*"
 docopt_macros = "*"
 fs_extra = "*"
+heck = "*"
 
 [[bench]]
 name = "bench"

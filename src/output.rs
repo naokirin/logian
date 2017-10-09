@@ -60,7 +60,8 @@ impl LogianOutput {
         let types = ::parser::parse_user_defined_types(&format!("{}/types", self.schema_dir)[..]);
         let log_schemas = ::parser::parse_log_schemas(&format!("{}/schemas/logs", self.schema_dir)[..], &types);
         let default_schema = ::parser::parse_default_log_schema(&format!("{}/schemas/default.json", self.schema_dir)[..], &types);
-        let tera = ::template::generator::find_templates(&self.plugin_dir[..], &self.plugin_name[..]);
+        let mut tera = ::template::generator::find_templates(&self.plugin_dir[..], &self.plugin_name[..]);
+        ::template::filter::register(&mut tera);
 
         if self.compiled {
             self.output_compiled_file(&tera, &types, &log_schemas, &default_schema);
