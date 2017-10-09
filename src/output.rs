@@ -1,4 +1,5 @@
 extern crate tera;
+
 use self::tera::Tera;
 
 type UserDefinedTypes = Vec<::schema::data_type::DataType>;
@@ -19,6 +20,7 @@ pub struct LogianOutput {
     pub types_file_name: String,
     pub file_suffix: String,
     pub compiled: bool,
+    pub file_name_case: ::plugin::FileNameCase,
 }
 
 impl LogianOutput {
@@ -33,8 +35,11 @@ impl LogianOutput {
         let logs = ::template::generator::render_logs(tera, LOGS_TEMPLATE, log_schemas, default_schema, types);
         let data_types = ::template::generator::render_types(tera, TYPES_TEMPLATE, types);
 
-        let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, self.logs_file_name, self.file_suffix)[..], &logs[..]);
-        let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, self.types_file_name, self.file_suffix)[..], &data_types[..]);
+        let logs_file_name = ::plugin::convert_case(&self.logs_file_name, &self.file_name_case);
+        let types_file_name = ::plugin::convert_case(&self.types_file_name, &self.file_name_case);
+
+        let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, logs_file_name, self.file_suffix)[..], &logs[..]);
+        let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, types_file_name, self.file_suffix)[..], &data_types[..]);
     }
 
     fn output_files(
@@ -46,12 +51,14 @@ impl LogianOutput {
     ) {
         for schema in log_schemas.iter() {
             let log = ::template::generator::render_log(tera, LOG_TEMPLATE, &schema, default_schema, types);
-            let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, schema.name, self.file_suffix)[..], &log[..]);
+            let name = ::plugin::convert_case(&schema.name, &self.file_name_case);
+            let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, name, self.file_suffix)[..], &log[..]);
         }
 
         for user_defined_type in types.iter() {
             let data_type = ::template::generator::render_type(tera, TYPE_TEMPLATE, &user_defined_type);
-            let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, user_defined_type.name(), self.file_suffix)[..], &data_type[..]);
+            let name = ::plugin::convert_case(&user_defined_type.name(), &self.file_name_case);
+            let _ = ::file::writer::write(&format!("{}/{}{}", self.output_dir, name, self.file_suffix)[..], &data_type[..]);
         }
     }
 
