@@ -1,15 +1,12 @@
-use std::path::Path;
+extern crate fs_extra;
 
-pub struct Lib {
-    pub path: String,
-    pub to: String,
-}
+use std::path::Path;
 
 pub struct Setting {
     pub plugin_name: String,
     pub compiled: bool,
     pub file_suffix: String,
-    pub libs: Vec<Lib>,
+    pub libs: Vec<String>,
 }
 
 pub fn parse_setting(plugin_dir: &String, plugin_name: &String) -> Setting {
@@ -22,14 +19,26 @@ pub fn parse_setting(plugin_dir: &String, plugin_name: &String) -> Setting {
         panic!("{} is invalid libs item.", path);
     }
     let libs = libs.as_array().unwrap().into_iter()
-        .map(|value| Lib {
-            path: value["path"].as_str().unwrap().to_string(),
-            to: value["to"].as_str().unwrap().to_string(),
-        }).collect();
+        .map(|value| value.as_str().unwrap().to_string())
+        .collect();
     Setting {
         plugin_name: plugin_name.clone(),
         compiled: json["compiled"].as_bool().unwrap(),
         file_suffix: json["file_suffix"].as_str().unwrap().to_string(),
         libs: libs,
     }
+}
+
+pub fn copy_libs(libs: &Vec<String>, plugin_path: &String, plugin_name: &String, output_dir: &String) {
+    let path = Path::new(&plugin_path[..]).join(&plugin_name[..]);
+    let libs = libs.into_iter()
+        .map(|lib| path.join(lib.clone()))
+        .collect();
+
+    let options = fs_extra::dir::CopyOptions {
+        overwrite: true,
+        skip_exist: false,
+        buffer_size: 64000,
+    };
+    fs_extra::copy_items(&libs, &output_dir[..], &options).unwrap();
 }

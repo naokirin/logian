@@ -11,6 +11,7 @@ tera = "*"
 glob = "*"
 docopt = "*"
 docopt_macros = "*"
+fs_extra = "*"
 
 [[bench]]
 name = "bench"
