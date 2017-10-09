@@ -18,6 +18,7 @@ pub fn parse() -> Args {
     Args::docopt().deserialize().unwrap_or_else(|e| e.exit())
 }
 
+#[derive(Debug)]
 pub struct Output {
     pub plugin_name: String,
     pub schema_dir: String,
@@ -25,17 +26,20 @@ pub struct Output {
     pub plugin_dir: String,
 }
 
+#[derive(Debug)]
 pub struct GeneratedField {
     pub field_name: String,
     pub data_type: String,
     pub nullable: bool,
 }
 
+#[derive(Debug)]
 pub enum GeneratedKind {
     Log,
     Type,
 }
 
+#[derive(Debug)]
 pub struct Generate {
     pub kind: GeneratedKind,
     pub name: String,
@@ -47,9 +51,9 @@ impl Args {
         self.cmd_output
     }
 
-    pub fn as_output(&self) -> Option<Output> {
+    pub fn as_output(&self) -> Result<Output, String> {
         if !self.is_output() {
-            return Option::None;
+            return Err("This argument is not output.".to_string());
         }
 
         let mut plugin_dir = self.flag_plugin_dir.to_string();
@@ -59,7 +63,7 @@ impl Args {
             plugin_dir = exe_dir.clone().join("plugin").to_str().unwrap().to_string();
         }
 
-        Some(Output {
+        Ok(Output {
             plugin_name: self.arg_plugin.clone(),
             schema_dir: self.arg_schema_dir.clone(),
             output_dir: self.arg_output_dir.clone(),
@@ -71,16 +75,16 @@ impl Args {
         self.cmd_generate
     }
 
-    pub fn as_generate(&self) -> Option<Generate> {
+    pub fn as_generate(&self) -> Result<Generate, String> {
         if !self.is_generate() {
-            return Option::None;
+            return Err("This argument is not generate.".to_string());
         }
 
         let fields = self.clone().arg_field.iter().map(|field| {
             let field_and_type: Vec<&str> = field.split(':').collect();
 
             if field_and_type.len() != 2 {
-                panic!("Found invalid field format: {}.", field);
+                return Err(format!("Found invalid field format: {}.", field));
             }
 
             let mut data_type = field_and_type[1].to_string();
@@ -90,23 +94,27 @@ impl Args {
                 data_type.pop();
             }
 
-            GeneratedField {
+            Ok(GeneratedField {
                 field_name: field_and_type[0].to_string(),
                 data_type: data_type,
                 nullable: nullable,
-            }
+            })
 
-        }).collect();
+        }).collect::<Result<Vec<GeneratedField>, String>>();
+
+        if fields.is_err() {
+            return Err(fields.unwrap_err());
+        }
 
         let mut kind = GeneratedKind::Log;
         if self.cmd_type {
             kind = GeneratedKind::Type;
         }
 
-        Some(Generate {
+        Ok(Generate {
             kind: kind,
             name: self.arg_log_name.clone(),
-            fields: fields,
+            fields: fields.unwrap(),
         })
     }
 }

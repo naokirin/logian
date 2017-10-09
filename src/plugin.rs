@@ -40,25 +40,25 @@ fn parse_file_name_case(s: &String) -> FileNameCase {
     }
 }
 
-pub fn parse_setting(plugin_dir: &String, plugin_name: &String) -> Setting {
+pub fn parse_setting(plugin_dir: &String, plugin_name: &String) -> Result<Setting, String> {
     let path = Path::new(&plugin_dir[..]).join(&plugin_name[..]).join("config.json");
     let path = path.to_str().unwrap();
     let json_file = ::file::read(&path[..]).unwrap();
-    let json = ::json::parse(&json_file[..]);
+    let json = ::json::parse(&json_file[..])?;
     let libs = &json["libs"];
     if !libs.is_array() {
-        panic!("{} is invalid libs item.", path);
+        return Err(format!("{} is invalid libs item.", path))
     }
     let libs = libs.as_array().unwrap().into_iter()
         .map(|value| value.as_str().unwrap().to_string())
         .collect();
-    Setting {
+    Ok(Setting {
         plugin_name: plugin_name.clone(),
         compiled: json["compiled"].as_bool().unwrap(),
         file_suffix: json["file_suffix"].as_str().unwrap().to_string(),
         file_name_case: parse_file_name_case(&json["file_name_case"].as_str().unwrap().to_string()),
         libs: libs,
-    }
+    })
 }
 
 pub fn copy_libs(libs: &Vec<String>, plugin_path: &String, plugin_name: &String, output_dir: &String) {
