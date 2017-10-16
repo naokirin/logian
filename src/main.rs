@@ -22,10 +22,40 @@ fn unwrap_result<T>(result: Result<T, String>) -> T {
     }
 }
 
+fn convert_generated_field(field: &option::GeneratedField) -> schema::generator::GeneratedField {
+    schema::generator::GeneratedField {
+        name: field.field_name.clone(),
+        data_type: field.data_type.clone(),
+        nullable: field.nullable,
+    }
+}
+
 fn main() {
     let args = option::parse();
-    if args.is_generate() {
-        let _ = unwrap_result(args.as_generate());
+    if args.is_type_generate() {
+        let param = unwrap_result(args.as_type_generate());
+        let _ = unwrap_result(schema::generator::GeneratedType {
+            schema_dir: param.schema_dir,
+            name: param.name,
+            fields: param.fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
+        }.generate());
+
+    }
+    else if args.is_log_generate() {
+        let param = unwrap_result(args.as_log_generate());
+        let _ = unwrap_result(schema::generator::GeneratedLog {
+            schema_dir: param.schema_dir,
+            name: param.name,
+            fields: param.fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
+        }.generate());
+    }
+    else if args.is_default_log_generate() {
+        let param = unwrap_result(args.as_default_log_generate());
+        let _ = unwrap_result(schema::generator::GeneratedDefaultLog {
+            schema_dir: param.schema_dir,
+            front_fields: param.front_fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
+            back_fields: param.back_fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
+        }.generate());
     }
     else if args.is_output() {
         let param = unwrap_result(args.as_output());
