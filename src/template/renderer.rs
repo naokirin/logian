@@ -11,8 +11,8 @@ fn unwrap_result<T: Debug, E: Debug>(result: Result<T, E>) -> T {
     panic!("{:?}", result.unwrap_err());
 }
 
-pub fn find_templates(template_dir: &str, plugin_name: &str) -> Tera {
-    let templates = format!("{}/{}/templates/**/*.tera", template_dir, plugin_name);
+pub fn find_templates(template_dir: &str) -> Tera {
+    let templates = format!("{}/**/*.tera", template_dir);
     let result = Tera::new(&templates[..]);
     unwrap_result(result)
 }

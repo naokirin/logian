@@ -69,10 +69,11 @@ impl LogianOutput {
     pub fn output(&self) -> Result<(), String> {
 
         let types = parser::parse_user_defined_types(&format!("{}/types", self.schema_dir)[..])?;
-        let log_schemas = parser::parse_log_schemas(&format!("{}/schemas/logs", self.schema_dir)[..], &types)?;
-        let default_schema = parser::parse_default_log_schema(&format!("{}/schemas/default.json", self.schema_dir)[..], &types)?;
-        let mut tera = renderer::find_templates(&self.plugin_dir[..], &self.plugin_name[..]);
+        let log_schemas = parser::parse_log_schemas(&format!("{}/logs", self.schema_dir)[..], &types)?;
+        let default_schema = parser::parse_default_log_schema(&format!("{}/default.json", self.schema_dir)[..], &types)?;
+        let mut tera = renderer::find_templates(&format!("{}/{}/templates", self.plugin_dir, self.plugin_name)[..]);
         filter::register(&mut tera);
+        tera.autoescape_on(vec![]);
 
         if self.compiled {
             self.output_compiled_file(&tera, &types, &log_schemas, &default_schema);

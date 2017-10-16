@@ -16,12 +16,12 @@ pub enum DataType {
 impl DataType {
     pub fn name(&self) -> String {
         match *self {
-            DataType::Boolean => "Boolean",
-            DataType::Integer => "Integer",
-            DataType::Float => "Float",
-            DataType::String => "String",
-            DataType::DateTime => "DateTime",
-            DataType::Timestamp => "Timestamp",
+            DataType::Boolean => "boolean",
+            DataType::Integer => "integer",
+            DataType::Float => "float",
+            DataType::String => "string",
+            DataType::DateTime => "datetime",
+            DataType::Timestamp => "timestamp",
             DataType::Struct(ref name, _) => &name[..],
         }.to_string()
     }

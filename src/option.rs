@@ -3,15 +3,19 @@ use std::env;
 
 docopt!(pub Args derive Debug, "
 Usage:
-  logian output <plugin> <schema-dir> <output-dir> [--plugin-dir=<pd>]
-  logian generate (log|type) <log-name> [<field>...]
+  logian output <plugin> <output-dir> [--plugin-dir=<pd>] [--schema-dir=<sd>]
+  logian generate (log|type) <name> [<field>...] [--schema-dir=<sd>]
+  logian generate default-log [--front FRONT...] [--back BACK...] [--schema-dir=<sd>]
   logian (-h | --help)
   logian --version
 
 Options:
-  -h --help         Show this screen.
-  --version         Show version.
-  --plugin-dir=<pd>  Plugin directory [default: ].
+  -h --help             Show this screen.
+  --version             Show version.
+  --plugin-dir=<pd>     Plugin directory [default: ].
+  --schema-dir=<pd>     Schema directory [default: .].
+  --front FRONT         Default log schema front fields [default: ].
+  --back BACK           Default log schema back fields [default: ].
 ");
 
 pub fn parse() -> Args {
@@ -44,6 +48,14 @@ pub struct Generate {
     pub kind: GeneratedKind,
     pub name: String,
     pub fields: Vec<GeneratedField>,
+    pub schema_dir: String,
+}
+
+#[derive(Debug)]
+pub struct GeneratedDefaultLog {
+    pub front_fields: Vec<GeneratedField>,
+    pub back_fields: Vec<GeneratedField>,
+    pub schema_dir: String,
 }
 
 impl Args {
@@ -65,22 +77,26 @@ impl Args {
 
         Ok(Output {
             plugin_name: self.arg_plugin.clone(),
-            schema_dir: self.arg_schema_dir.clone(),
+            schema_dir: self.flag_schema_dir.to_string(),
             output_dir: self.arg_output_dir.clone(),
             plugin_dir: plugin_dir,
         })
     }
 
-    pub fn is_generate(&self) -> bool {
-        self.cmd_generate
+    pub fn is_type_generate(&self) -> bool {
+        self.cmd_generate && self.cmd_type
     }
 
-    pub fn as_generate(&self) -> Result<Generate, String> {
-        if !self.is_generate() {
-            return Err("This argument is not generate.".to_string());
-        }
+    pub fn is_log_generate(&self) -> bool {
+        self.cmd_generate && self.cmd_log
+    }
 
-        let fields = self.clone().arg_field.iter().map(|field| {
+    pub fn is_default_log_generate(&self) -> bool {
+        self.cmd_generate && self.cmd_default_log
+    }
+
+    fn get_fields(&self, fields: &Vec<String>) -> Result<Vec<GeneratedField>, String> {
+        fields.iter().map(|field| {
             let field_and_type: Vec<&str> = field.split(':').collect();
 
             if field_and_type.len() != 2 {
@@ -100,8 +116,11 @@ impl Args {
                 nullable: nullable,
             })
 
-        }).collect::<Result<Vec<GeneratedField>, String>>();
+        }).collect::<Result<Vec<GeneratedField>, String>>()
+    }
 
+    fn as_generate(&self) -> Result<Generate, String> {
+        let fields = self.get_fields(&self.clone().arg_field);
         if fields.is_err() {
             return Err(fields.unwrap_err());
         }
@@ -113,8 +132,43 @@ impl Args {
 
         Ok(Generate {
             kind: kind,
-            name: self.arg_log_name.clone(),
+            name: self.arg_name.clone(),
             fields: fields.unwrap(),
+            schema_dir: self.flag_schema_dir.to_string(),
+        })
+    }
+
+    pub fn as_log_generate(&self) -> Result<Generate, String> {
+        if !self.is_log_generate() {
+            return Err("This argument is not log generate.".to_string());
+        }
+        self.as_generate()
+    }
+
+    pub fn as_type_generate(&self) -> Result<Generate, String> {
+        if !self.is_type_generate() {
+            return Err("This argument is not type generate.".to_string());
+        }
+        self.as_generate()
+    }
+
+    pub fn as_default_log_generate(&self) -> Result<GeneratedDefaultLog, String> {
+        if !self.is_default_log_generate() {
+            return Err("This argument is not default log generate.".to_string());
+        }
+        let front_fields = self.get_fields(&self.clone().flag_front);
+        let back_fields = self.get_fields(&self.clone().flag_back);
+        if front_fields.is_err() {
+            return Err(front_fields.unwrap_err());
+        }
+        if back_fields.is_err() {
+            return Err(back_fields.unwrap_err());
+        }
+
+        Ok(GeneratedDefaultLog {
+            front_fields: front_fields.unwrap(),
+            back_fields: back_fields.unwrap(),
+            schema_dir: self.flag_schema_dir.to_string(),
         })
     }
 }

@@ -23,7 +23,7 @@ fn parse_field_user_defined_type(
 
 fn parse_data_type(type_name: &str, user_defined_types: &Vec<DataType>) -> Result<DataType, String> {
     match type_name {
-        "bool"            => Ok(DataType::Boolean),
+        "boolean"         => Ok(DataType::Boolean),
         "integer"         => Ok(DataType::Integer),
         "float"           => Ok(DataType::Float),
         "string"          => Ok(DataType::String),
