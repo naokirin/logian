@@ -1,12 +1,12 @@
 {
     "front": [
         {% for field in front_fields %}
-        { "name": "{{ field.name }}", "type": "{{ field.data_type }}" }{% if not loop.last %},{% endif %}
+        { "name": "{{ field.name }}", "type": "{{ field.data_type }}{% if field.nullable %}?{% endif %}" }{% if not loop.last %},{% endif %}
         {% endfor %}
     ],
     "back": [
         {% for field in back_fields %}
-        { "name": "{{ field.name }}", "type": "{{ field.data_type }}" }{% if not loop.last %},{% endif %}
+        { "name": "{{ field.name }}", "type": "{{ field.data_type }}{% if field.nullable %}?{% endif %}" }{% if not loop.last %},{% endif %}
         {% endfor %}
     ]
 }
