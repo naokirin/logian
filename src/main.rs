@@ -6,6 +6,9 @@ extern crate serde_derive;
 #[macro_use]
 extern crate tera;
 
+use std::fs::create_dir_all;
+use std::env;
+
 mod file;
 mod template;
 mod schema;
@@ -15,10 +18,10 @@ mod option;
 mod output;
 mod plugin;
 
-fn unwrap_result<T>(result: Result<T, String>) -> T {
+fn unwrap_result<T, U: std::fmt::Debug>(result: Result<T, U>) -> T {
     match result {
         Ok(value) => value,
-        Err(e) => panic!(e),
+        Err(e) => panic!(format!("{:?}", e)),
     }
 }
 
@@ -32,30 +35,40 @@ fn convert_generated_field(field: &option::GeneratedField) -> schema::generator:
 
 fn main() {
     let args = option::parse();
+    let exe_path = env::current_exe().unwrap();
+    let exe_dir = exe_path.parent().unwrap();
+    let template_dir = exe_dir.clone().join("template").to_str().unwrap().to_string();
+
     if args.is_type_generate() {
         let param = unwrap_result(args.as_type_generate());
-        let _ = unwrap_result(schema::generator::GeneratedType {
-            schema_dir: param.schema_dir,
-            name: param.name,
+        let _ = unwrap_result(create_dir_all(&format!("{}/types", param.schema_dir)[..]));
+        let s = unwrap_result(schema::generator::GeneratedType {
+            template_dir: template_dir,
             fields: param.fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
         }.generate());
 
+        let _ = unwrap_result(file::write(&format!("{}/types/{}.json", param.schema_dir, param.name)[..], &s[..]));
     }
     else if args.is_log_generate() {
         let param = unwrap_result(args.as_log_generate());
-        let _ = unwrap_result(schema::generator::GeneratedLog {
-            schema_dir: param.schema_dir,
-            name: param.name,
+        let _ = unwrap_result(create_dir_all(&format!("{}/logs", param.schema_dir)[..]));
+        let s = unwrap_result(schema::generator::GeneratedLog {
+            template_dir: template_dir,
             fields: param.fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
         }.generate());
+
+        let _ = unwrap_result(file::write(&format!("{}/logs/{}.json", param.schema_dir, param.name)[..], &s[..]));
     }
     else if args.is_default_log_generate() {
         let param = unwrap_result(args.as_default_log_generate());
-        let _ = unwrap_result(schema::generator::GeneratedDefaultLog {
-            schema_dir: param.schema_dir,
+        let _ = unwrap_result(create_dir_all(&format!("{}", param.schema_dir)[..]));
+        let s = unwrap_result(schema::generator::GeneratedDefaultLog {
+            template_dir: template_dir,
             front_fields: param.front_fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
             back_fields: param.back_fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
         }.generate());
+
+        let _ = unwrap_result(file::write(&format!("{}/default.json", param.schema_dir)[..], &s[..]));
     }
     else if args.is_output() {
         let param = unwrap_result(args.as_output());
