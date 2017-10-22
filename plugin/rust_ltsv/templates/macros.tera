@@ -1,0 +1,79 @@
+{% macro data_type(name) %}
+{% if name|snake == "boolean" %}bool
+{% elif name|snake == "integer" %}i64
+{% elif name|snake == "float" %}f64
+{% elif name|snake == "string" %}&str
+{% elif name|snake == "datetime" %}&str
+{% elif name|snake == "timestamp" %}&str
+{% else %}::types::data_type::{{ name|upper_camel }}
+{% endif %}
+{% endmacro data_type %}
+
+{% macro type(name, nullable) %}
+{% if nullable == "Nullable" %}Option<{{ self::data_type(name=name) }}>{% else %}{{ self::data_type(name=name) }}{% endif %}
+{% endmacro type %}
+
+{% macro front_comma(default_log, fields) %}
+{% if fields|length + default_log.back_fields|length > 0 and default_log.front_fields|length > 0 %}, {% endif %}
+{% endmacro front_comma %}
+
+{% macro back_comma(default_log, fields) %}
+{% if fields|length + default_log.front_fields|length > 0 and default_log.back_fields|length > 0 %}, {% endif %}
+{% endmacro back_comma %}
+
+{% macro front_tab(default_log, fields) %}
+{% if fields|length + default_log.back_fields|length > 0 and default_log.front_fields|length > 0 %}\t{% endif %}
+{% endmacro front_tab %}
+
+{% macro back_tab(default_log, fields) %}
+{% if fields|length + default_log.front_fields|length > 0 and default_log.back_fields|length > 0 %}\t{% endif %}
+{% endmacro back_tab %}
+
+{% macro front_format(default_log) %}
+{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}
+{% endmacro front_format %}
+
+{% macro back_format(default_log) %}
+{% for field in default_log.back_fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}
+{% endmacro back_format %}
+
+{% macro format(default_log, fields) %}
+{{ self::front_format(default_log=default_log) }}{{ self::front_tab(default_log=default_log, fields=fields) }}{% for field in fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}{{ self::back_tab(default_log=default_log, fields=fields) }}{{ self::back_format(default_log=default_log) }}
+{% endmacro format %}
+
+{% macro front_parameters(default_log) %}
+{% for field in default_log.front_fields %}{{ field.name|snake }}: {{ self::type(name=field.data_type.name, nullable=field.type_attribute) }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endmacro front_parameters %}
+
+{% macro back_parameters(default_log) %}
+{% for field in default_log.back_fields %}{{ field.name|snake }}: {{ self::type(name=field.data_type.name, nullable=field.type_attribute) }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endmacro back_parameters %}
+
+{% macro parameters(default_log, fields) %}
+{{ self::front_parameters(default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{{ field.name|snake }}: {{ self::type(name=field.data_type.name, nullable=field.type_attribute) }}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_parameters(default_log=default_log) }}
+{% endmacro parameters %}
+
+{% macro front_arguments(default_log) %}
+{% for field in default_log.front_fields %}{{ field.name|snake }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endmacro front_arguments %}
+
+{% macro back_arguments(default_log) %}
+{% for field in default_log.back_fields %}{{ field.name|snake }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endmacro back_arguments %}
+
+{% macro arguments(default_log, fields) %}
+{{ self::front_arguments(default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{{ field.name|snake }}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments(default_log=default_log) }}
+{% endmacro arguments %}
+
+{% macro type_format(fields) %}
+{% for field in fields %}{{ field.name }}:{}{% if not loop.last %}\t{% endif %}{% endfor %}
+{% endmacro type_format %}
+
+{% macro type_arguments(fields) %}
+{% for field in fields %}self.{{ field.name|snake }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endmacro type_arguments %}
+
+{% macro type_parameters(fields) %}
+{% for field in fields %}pub {{ field.name|snake }}: {{ self::type(name=field.data_type.name, nullable=field.type_attribute) }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endmacro type_parameters %}
+

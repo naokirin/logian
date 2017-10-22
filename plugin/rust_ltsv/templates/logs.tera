@@ -1,0 +1,35 @@
+{% import "macros.tera" as macros %}pub mod stdout {
+    {% for log in logs %}
+    #[allow(dead_code)]
+    pub fn {{ log.name|snake }}({{ macros::parameters(default_log=default_log, fields=log.fields) }}) {
+        println!("{{ macros::format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields) }});
+    }
+
+    {% endfor %}
+}
+
+pub mod stderr {
+    {% for log in logs %}
+    #[allow(dead_code)]
+    pub fn {{ log.name|snake }}({{ macros::parameters(default_log=default_log, fields=log.fields) }}) {
+        eprintln!("{{ macros::format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields) }});
+    }
+
+    {% endfor %}
+}
+
+pub mod file {
+    use std::io::{Write, BufWriter, Error};
+    use std::fs::File;
+
+    {% for log in logs %}
+    #[allow(dead_code)]
+    pub fn {{ log.name|snake }}(path: &str, {{ macros::parameters(default_log=default_log, fields=log.fields) }}) -> Result<(), Error> {
+        let f = File::create(path)?;
+        let mut writer = BufWriter::new(f);
+        let data = format!("{{ macros::format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields) }});
+        writer.write_all(data.as_bytes())
+    }
+
+    {% endfor %}
+}
