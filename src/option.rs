@@ -5,7 +5,7 @@ docopt!(pub Args derive Debug, "
 Usage:
   logian output <plugin> <output-dir> [--plugin-dir=<pd>] [--schema-dir=<sd>]
   logian generate (log|type) <name> [<field>...] [--schema-dir=<sd>]
-  logian generate default-log [--front FRONT...] [--back BACK...] [--schema-dir=<sd>]
+  logian generate default-log [--front FRONT] [--back BACK] [--schema-dir=<sd>]
   logian (-h | --help)
   logian --version
 
@@ -97,7 +97,7 @@ impl Args {
 
     fn get_fields(&self, fields: &Vec<String>) -> Result<Vec<GeneratedField>, String> {
         fields.iter().map(|field| {
-            let field_and_type: Vec<&str> = field.split(':').collect();
+            let field_and_type: Vec<&str> = field.split(':').map(|f| f.trim()).collect();
 
             if field_and_type.len() != 2 {
                 return Err(format!("Found invalid field format: {}.", field));
@@ -152,12 +152,16 @@ impl Args {
         self.as_generate()
     }
 
+    fn parse_default_log_fields(&self, fields: &String) -> Vec<String> {
+        fields.split(',').map(|f| f.trim().to_string()).collect()
+    }
+
     pub fn as_default_log_generate(&self) -> Result<GeneratedDefaultLog, String> {
         if !self.is_default_log_generate() {
             return Err("This argument is not default log generate.".to_string());
         }
-        let front_fields = self.get_fields(&self.clone().flag_front);
-        let back_fields = self.get_fields(&self.clone().flag_back);
+        let front_fields = self.get_fields(&self.parse_default_log_fields(&self.flag_front));
+        let back_fields = self.get_fields(&self.parse_default_log_fields(&self.flag_back));
         if front_fields.is_err() {
             return Err(front_fields.unwrap_err());
         }
