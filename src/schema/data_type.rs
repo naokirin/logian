@@ -1,6 +1,6 @@
 extern crate serde;
 
-use self::serde::ser::{Serialize, Serializer};
+use self::serde::ser::{Serialize, Serializer, SerializeStruct};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum DataType {
@@ -13,17 +13,27 @@ pub enum DataType {
     Struct(String, Vec<Field>)
 }
 
+#[derive(Serialize)]
+struct SerializedDataType {
+    name: String,
+    fields: Vec<Field>,
+}
+
 impl DataType {
-    pub fn name(&self) -> String {
+    fn convert_serialized(&self) -> SerializedDataType {
         match *self {
-            DataType::Boolean => "boolean",
-            DataType::Integer => "integer",
-            DataType::Float => "float",
-            DataType::String => "string",
-            DataType::DateTime => "datetime",
-            DataType::Timestamp => "timestamp",
-            DataType::Struct(ref name, _) => &name[..],
-        }.to_string()
+            DataType::Boolean => SerializedDataType { name: "boolean".to_string(), fields: vec![] },
+            DataType::Integer => SerializedDataType { name: "integer".to_string(), fields: vec![] },
+            DataType::Float => SerializedDataType { name: "float".to_string(), fields: vec![] },
+            DataType::String => SerializedDataType { name: "string".to_string(), fields: vec![] },
+            DataType::DateTime => SerializedDataType { name: "datetime".to_string(), fields: vec![] },
+            DataType::Timestamp => SerializedDataType { name: "timestamp".to_string(), fields: vec![] },
+            DataType::Struct(ref name, ref fields) => SerializedDataType { name: name.clone(), fields: fields.clone() },
+        }
+    }
+
+    pub fn name(&self) -> String {
+        self.convert_serialized().name
     }
 }
 
@@ -31,8 +41,12 @@ impl Serialize for DataType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
-        let state = serializer.serialize_str(&self.name()[..])?;
-        Result::Ok(state)
+        let data = self.convert_serialized();
+
+        let mut state = serializer.serialize_struct("DataType", 2)?;
+        state.serialize_field("name", &data.name)?;
+        state.serialize_field("fields", &data.fields)?;
+        state.end()
     }
 }
 
