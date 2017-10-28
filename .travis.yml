@@ -33,6 +33,21 @@ script:
   - cargo build --release --target $TARGET
   - cargo test --verbose
 
+before_deploy:
+  - ./pack_releases.sh "${TRAVIS_TAG}" "${TARGET}"
+
+deploy:
+  provider: releases
+  api_key:
+    - secure: "ba6vcOEJ26wLHrQUJcDCAH0w0kCox7CvWXG9Vo+OOoT6hLDI5plnGsTfHEqsV/Z6rDj8YNlgmKFKGUKrO0NCz+7jB7fSMNeWAoYq53GHI7135Gh72HhiN7nZ7HAuqwsp2c0mZmbCjYRescdQbZUw8mzxhEtoxtz2z0F3g89OZPpFv0/OTMy9RxUJiaYlBKR/z9WIUjCFi8i75gjHNVgLh8sxJD5KRhg3nmvF0kcj6SKsRyGEQ5qckPWT3lW6q2SjrmIsWb1JQs+MM3fM4u+J2Xw70WHBWi94W4T4v/s4i537cnlkCAGcvrp1NQGrQdqRhQBtMvr8feEJ66QE/8atKI3emy+IC8KnBAV/X4YLGxk+umVow7B0+nAmBLqrGF7+3YYSCbhW+S1D9c151uNf7nHrHXDojFyw7SlF4e5b6EYfH+FLiJWGN0pzFosHbtz0SK8URrLoEa1WhoMwtptVcFOs4p+TlL8U+Lky1Hw7Jlcv5kSBmJBHkN4mvwE+KR70hW8GbYWjRCPKmGR2pDh6BXY9Cigf6YDzAHkYthjRb7sq3OuJlUw2Q6lPphegQb25x+YCaHJ3ulDl/x5fCtTW3tNRlmKpej1DhL0q5FacpKbk/M0ZxST02jmxcF1uaHjwQaRZrEhho4UWHLtW3sFQgKSypptV6XZMATxazMgiNZE="
+  file_glob: true
+  file: "logian-*.zip"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    condition: "$TRAVIS_TAG =~ ^v[0-9].*$"
+
 addons:
   apt:
     packages:
