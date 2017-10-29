@@ -1,5 +1,10 @@
 os: Visual Studio 2015
 
+branches:
+  only:
+    - master
+    - "/^v[0-9].*$/"
+
 environment:
   matrix:
     - CHANNEL: nightly

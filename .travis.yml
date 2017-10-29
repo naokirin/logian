@@ -2,6 +2,11 @@ language: rust
 rust:
   - nightly
 
+branches:
+  only:
+    - master
+    - "/^v[0-9].*$/"
+
 matrix:
   include:
     - os: osx
