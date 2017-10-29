@@ -32,6 +32,8 @@ $ logian generate type type_name column1:string column2:integer --schema_dir=./s
 $ logian output rust_ltsv ./output_dir --schema-dir=./schemas
 ```
 
+For details about options, see `logian --help` command.
+
 ## Types
 
 Logian supports primitive types, user-defined types and type attributes.

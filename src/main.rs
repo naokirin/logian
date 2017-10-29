@@ -45,6 +45,7 @@ fn main() {
         let s = unwrap_result(schema::generator::GeneratedType {
             template_dir: template_dir,
             fields: param.fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
+            comment: param.comment,
         }.generate());
 
         let _ = unwrap_result(file::write(&format!("{}/types/{}.json", param.schema_dir, param.name)[..], &s[..]));
@@ -55,6 +56,7 @@ fn main() {
         let s = unwrap_result(schema::generator::GeneratedLog {
             template_dir: template_dir,
             fields: param.fields.into_iter().map(|field| convert_generated_field(&field)).collect(),
+            comment: param.comment,
         }.generate());
 
         let _ = unwrap_result(file::write(&format!("{}/logs/{}.json", param.schema_dir, param.name)[..], &s[..]));

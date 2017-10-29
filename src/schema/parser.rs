@@ -9,7 +9,7 @@ fn parse_field_user_defined_type(
     user_defined_types: &Vec<DataType>
 ) -> Result<DataType, String> {
     let user_defined_type = user_defined_types.into_iter().find(|x| {
-        if let DataType::Struct(ref user_defined_name, _) = **x {
+        if let DataType::Struct(ref user_defined_name, _, _) = **x {
             user_defined_name == data_type_name
         } else {
             false
@@ -72,7 +72,7 @@ fn parse_fields(
     user_defined_types: &Vec<DataType>
 ) -> Result<Vec<Field>, String> {
     if !json_value.is_array() {
-        return Err(format!("Json root is not an array: {}.", log_name));
+        return Err(format!("Fields is not an array: {}.", log_name));
     }
 
     let parsed = json_value.as_array().unwrap();
@@ -92,8 +92,17 @@ fn parse_fields(
 
 pub fn parse_log_schema(name: &str, json: &str, user_defined_types: &Vec<DataType>) -> Result<LogSchema, String> {
     let parsed = json::parse(json)?;
-    let fields = parse_fields(name, &parsed, user_defined_types)?;
-    Ok(LogSchema { name: name.to_string(), fields: fields })
+    if !parsed.is_object() {
+        return Err(format!("Json root is not an object: {}.", name));
+    }
+    let comment = parsed.as_object().unwrap().get("comment").unwrap();
+    if !comment.is_string() {
+        return Err(format!("Comment is not an string: {}.", name));
+    }
+    let comment = comment.as_str().unwrap();
+    let fields = parsed.as_object().unwrap().get("fields").unwrap();
+    let fields = parse_fields(name, &fields, user_defined_types)?;
+    Ok(LogSchema { name: name.to_string(), comment: comment.to_string(), fields: fields })
 }
 
 pub fn parse_default_log_schema(json: &str, user_defined_types: &Vec<DataType>) -> Result<DefaultLogSchema, String> {
@@ -118,7 +127,13 @@ pub fn parse_default_log_schema(json: &str, user_defined_types: &Vec<DataType>) 
 
 pub fn parse_user_defined_type(name: &str, json: &str) -> Result<DataType, String> {
     let parsed = json::parse(json)?;
-    let fields = parse_fields(name, &parsed, &vec![])?;
-    Ok(DataType::Struct(name.to_string(), fields))
+    let comment = parsed.as_object().unwrap().get("comment").unwrap();
+    if !comment.is_string() {
+        return Err(format!("Comment is not an string: {}.", name));
+    }
+    let comment = comment.as_str().unwrap();
+    let fields = parsed.as_object().unwrap().get("fields").unwrap();
+    let fields = parse_fields(name, &fields, &vec![])?;
+    Ok(DataType::Struct(name.to_string(), fields, comment.to_string()))
 }
 

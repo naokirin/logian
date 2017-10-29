@@ -10,25 +10,28 @@ pub enum DataType {
     String,
     DateTime,
     Timestamp,
-    Struct(String, Vec<Field>)
+    Struct(String, Vec<Field>, String)
 }
 
 #[derive(Serialize)]
 struct SerializedDataType {
     name: String,
     fields: Vec<Field>,
+    comment: String,
 }
 
 impl DataType {
     fn convert_serialized(&self) -> SerializedDataType {
         match *self {
-            DataType::Boolean => SerializedDataType { name: "boolean".to_string(), fields: vec![] },
-            DataType::Integer => SerializedDataType { name: "integer".to_string(), fields: vec![] },
-            DataType::Float => SerializedDataType { name: "float".to_string(), fields: vec![] },
-            DataType::String => SerializedDataType { name: "string".to_string(), fields: vec![] },
-            DataType::DateTime => SerializedDataType { name: "datetime".to_string(), fields: vec![] },
-            DataType::Timestamp => SerializedDataType { name: "timestamp".to_string(), fields: vec![] },
-            DataType::Struct(ref name, ref fields) => SerializedDataType { name: name.clone(), fields: fields.clone() },
+            DataType::Boolean => SerializedDataType { name: "boolean".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::Integer => SerializedDataType { name: "integer".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::Float => SerializedDataType { name: "float".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::String => SerializedDataType { name: "string".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::DateTime => SerializedDataType { name: "datetime".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::Timestamp => SerializedDataType { name: "timestamp".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::Struct(ref name, ref fields, ref comment) => SerializedDataType {
+                name: name.clone(), fields: fields.clone(), comment: comment.clone()
+            },
         }
     }
 
@@ -75,6 +78,9 @@ pub struct LogSchema {
 
     #[allow(dead_code)]
     pub fields: Vec<Field>,
+
+    #[allow(dead_code)]
+    pub comment: String,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Serialize)]

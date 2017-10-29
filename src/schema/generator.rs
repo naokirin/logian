@@ -15,6 +15,7 @@ pub struct GeneratedField {
 pub struct GeneratedLog {
     pub template_dir: String,
     pub fields: Vec<GeneratedField>,
+    pub comment: String,
 }
 
 pub struct GeneratedDefaultLog {
@@ -26,6 +27,7 @@ pub struct GeneratedDefaultLog {
 pub struct GeneratedType {
     pub template_dir: String,
     pub fields: Vec<GeneratedField>,
+    pub comment: String,
 }
 
 fn unwrap_result<T: Debug, E: Debug>(result: Result<T, E>) -> T {
@@ -46,6 +48,7 @@ impl GeneratedLog {
         let tera = create_tera(&self.template_dir);
         let mut context = Context::new();
         context.add("fields", &self.fields);
+        context.add("comment", &self.comment);
         let s = unwrap_result(tera.render("log_schema.tera", &context));
         Ok(s)
     }
@@ -56,6 +59,7 @@ impl GeneratedType {
         let tera = create_tera(&self.template_dir);
         let mut context = Context::new();
         context.add("fields", &self.fields);
+        context.add("comment", &self.comment);
         let s = unwrap_result(tera.render("data_type.tera", &context));
         Ok(s)
     }

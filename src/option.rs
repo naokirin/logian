@@ -4,7 +4,7 @@ use std::env;
 docopt!(pub Args derive Debug, "
 Usage:
   logian output <plugin> <output-dir> [--plugin-dir=<pd>] [--schema-dir=<sd>]
-  logian generate (log|type) <name> [<field>...] [--schema-dir=<sd>]
+  logian generate (log|type) <name> [<field>...] [--comment=<cm>] [--schema-dir=<sd>]
   logian generate default-log [--front FRONT] [--back BACK] [--schema-dir=<sd>]
   logian (-h | --help)
   logian --version
@@ -14,6 +14,7 @@ Options:
   --version             Show version.
   --plugin-dir=<pd>     Plugin directory [default: ].
   --schema-dir=<pd>     Schema directory [default: .].
+  --comment=<cm>        Log schema comment [default: ].
   --front FRONT         Default log schema front fields [default: ].
   --back BACK           Default log schema back fields [default: ].
 ");
@@ -48,6 +49,7 @@ pub struct Generate {
     pub kind: GeneratedKind,
     pub name: String,
     pub fields: Vec<GeneratedField>,
+    pub comment: String,
     pub schema_dir: String,
 }
 
@@ -134,6 +136,7 @@ impl Args {
             kind: kind,
             name: self.arg_name.clone(),
             fields: fields.unwrap(),
+            comment: self.flag_comment.to_string(),
             schema_dir: self.flag_schema_dir.to_string(),
         })
     }

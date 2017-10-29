@@ -6,9 +6,16 @@ pub fn test_generate_empty_field_log_schema() {
     let st = GeneratedLog {
         template_dir: "template".to_string(),
         fields: vec![],
+        comment: "".to_string(),
     };
     let actual = st.generate().unwrap();
-    let expected = "[\n    \n]\n";
+    let expected = r#"{
+    "comment": "",
+    "fields": [
+        
+    ]
+}
+"#;
     assert_eq!(expected, actual);
 }
 
@@ -23,9 +30,16 @@ pub fn test_generate_one_field_log_schema() {
                 nullable: false,
             }
         ],
+        comment: "comment".to_string(),
     };
     let actual = st.generate().unwrap();
-    let expected = "[\n    { \"name\": \"column1\", \"type\": \"string\" }\n]\n";
+    let expected =r#"{
+    "comment": "comment",
+    "fields": [
+        { "name": "column1", "type": "string" }
+    ]
+}
+"#;
     assert_eq!(expected, actual);
 }
 
@@ -46,12 +60,17 @@ pub fn test_generate_fields_log_schema() {
             }
 
         ],
+        comment: "comment".to_string(),
     };
     let actual = st.generate().unwrap();
-    let expected = "[
-    { \"name\": \"column1\", \"type\": \"string\" },
-    { \"name\": \"column2\", \"type\": \"boolean?\" }
-]\n";
+    let expected = r#"{
+    "comment": "comment",
+    "fields": [
+        { "name": "column1", "type": "string" },
+        { "name": "column2", "type": "boolean?" }
+    ]
+}
+"#;
     assert_eq!(expected, actual);
 }
 
@@ -60,9 +79,16 @@ pub fn test_generate_empty_field_type_schema() {
     let st = GeneratedType {
         template_dir: "template".to_string(),
         fields: vec![],
+        comment: "".to_string(),
     };
     let actual = st.generate().unwrap();
-    let expected = "[\n    \n]\n";
+    let expected = r#"{
+    "comment": "",
+    "fields": [
+        
+    ]
+}
+"#;
     assert_eq!(expected, actual);
 }
 
@@ -77,9 +103,16 @@ pub fn test_generate_one_field_type_schema() {
                 nullable: false,
             }
         ],
+        comment: "comment".to_string(),
     };
     let actual = st.generate().unwrap();
-    let expected = "[\n    { \"name\": \"column1\", \"type\": \"string\" }\n]\n";
+    let expected = r#"{
+    "comment": "comment",
+    "fields": [
+        { "name": "column1", "type": "string" }
+    ]
+}
+"#;
     assert_eq!(expected, actual);
 }
 
@@ -100,12 +133,17 @@ pub fn test_generate_fields_type_schema() {
             }
 
         ],
+        comment: "comment".to_string(),
     };
     let actual = st.generate().unwrap();
-    let expected = "[
-    { \"name\": \"column1\", \"type\": \"string\" },
-    { \"name\": \"column2\", \"type\": \"boolean?\" }
-]\n";
+    let expected = r#"{
+    "comment": "comment",
+    "fields": [
+        { "name": "column1", "type": "string" },
+        { "name": "column2", "type": "boolean?" }
+    ]
+}
+"#;
     assert_eq!(expected, actual);
 }
 
