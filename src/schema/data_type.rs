@@ -18,19 +18,20 @@ struct SerializedDataType {
     name: String,
     fields: Vec<Field>,
     comment: String,
+    user_defined: bool,
 }
 
 impl DataType {
     fn convert_serialized(&self) -> SerializedDataType {
         match *self {
-            DataType::Boolean => SerializedDataType { name: "boolean".to_string(), fields: vec![], comment: "".to_string() },
-            DataType::Integer => SerializedDataType { name: "integer".to_string(), fields: vec![], comment: "".to_string() },
-            DataType::Float => SerializedDataType { name: "float".to_string(), fields: vec![], comment: "".to_string() },
-            DataType::String => SerializedDataType { name: "string".to_string(), fields: vec![], comment: "".to_string() },
-            DataType::DateTime => SerializedDataType { name: "datetime".to_string(), fields: vec![], comment: "".to_string() },
-            DataType::Timestamp => SerializedDataType { name: "timestamp".to_string(), fields: vec![], comment: "".to_string() },
+            DataType::Boolean => SerializedDataType { name: "boolean".to_string(), fields: vec![], comment: "".to_string(), user_defined: false },
+            DataType::Integer => SerializedDataType { name: "integer".to_string(), fields: vec![], comment: "".to_string(), user_defined: false },
+            DataType::Float => SerializedDataType { name: "float".to_string(), fields: vec![], comment: "".to_string(), user_defined: false },
+            DataType::String => SerializedDataType { name: "string".to_string(), fields: vec![], comment: "".to_string(), user_defined: false },
+            DataType::DateTime => SerializedDataType { name: "datetime".to_string(), fields: vec![], comment: "".to_string(), user_defined: false },
+            DataType::Timestamp => SerializedDataType { name: "timestamp".to_string(), fields: vec![], comment: "".to_string(), user_defined: false },
             DataType::Struct(ref name, ref fields, ref comment) => SerializedDataType {
-                name: name.clone(), fields: fields.clone(), comment: comment.clone()
+                name: name.clone(), fields: fields.clone(), comment: comment.clone(), user_defined: true,
             },
         }
     }
@@ -49,6 +50,7 @@ impl Serialize for DataType {
         let mut state = serializer.serialize_struct("DataType", 2)?;
         state.serialize_field("name", &data.name)?;
         state.serialize_field("fields", &data.fields)?;
+        state.serialize_field("user_defined", &data.user_defined)?;
         state.end()
     }
 }

@@ -1,15 +1,11 @@
-{% import "macros.tera" as macros %}pub mod data_type {
-    use std::fmt;
-
-    {% for type in types %}
-    pub struct {{ type.name|upper_camel }}{
-        {{ macros::type_parameters(fields=type.fields) }}
-    }
-
-    impl fmt::Display for {{ type.name|upper_camel }} {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "{{ macros::type_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields) }})
-        }
-    }
-    {% endfor %}
+{% import "macros.tera" as macros %}{% for type in types %}pub struct {{ type.name|upper_camel }} {
+    {{ macros::type_parameters(fields=type.fields) }}
 }
+
+impl {{ type.name|upper_camel }} {
+    pub fn to_ltsv(&self) -> String {
+        format!("{{ macros::type_ltsv_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields) }})
+    }
+}
+
+{% endfor %}
