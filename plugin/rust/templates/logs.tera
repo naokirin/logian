@@ -7,6 +7,11 @@ impl {{ log.name|upper_camel }} {
     pub fn to_ltsv(&self) -> String {
         format!("{{ macros::ltsv_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="ltsv") }})
     }
+
+    #[allow(dead_code)]
+    pub fn to_json(&self) -> String {
+        format!("{{ macros::json_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="json") }})
+    }
 }
 
 {% endfor %}

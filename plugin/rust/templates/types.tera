@@ -6,6 +6,10 @@ impl {{ type.name|upper_camel }} {
     pub fn to_ltsv(&self) -> String {
         format!("{{ macros::type_ltsv_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields) }})
     }
+
+    pub fn to_json(&self) -> String {
+        format!("{{ macros::type_json_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields) }})
+    }
 }
 
 {% endfor %}
