@@ -1,7 +1,6 @@
 {
     "compiled": true,
-    "libs": [],
+    "libs": ["libs/ltsv.rs", "libs/json.rs"],
     "file_suffix": ".rs",
     "file_name_case": "snake"
 }
-

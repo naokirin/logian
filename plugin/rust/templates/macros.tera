@@ -29,6 +29,15 @@
 {% if fields|length + default_log.front_fields|length > 0 and default_log.back_fields|length > 0 %}\t{% endif %}
 {% endmacro back_tab %}
 
+{% macro front_newline(default_log, fields) %}
+{% if fields|length + default_log.back_fields|length > 0 and default_log.front_fields|length > 0 %}\n{% endif %}
+{% endmacro front_newline %}
+
+{% macro back_newline(default_log, fields) %}
+{% if fields|length + default_log.front_fields|length > 0 and default_log.back_fields|length > 0 %}\n{% endif %}
+{% endmacro back_newline %}
+
+
 {% macro front_ltsv_format(default_log) %}
 {% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}
 {% endmacro front_ltsv_format %}
@@ -50,16 +59,17 @@
 {% endmacro json_format_symbol %}
 
 {% macro front_json_format(default_log) %}
-{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %},{% endif %}{% endfor %}
+{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro front_json_format %}
 
 {% macro back_json_format(default_log) %}
-{% for field in default_log.back_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %},{% endif %}{% endfor %}
+{% for field in default_log.back_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro back_json_format %}
 
 {% macro json_format(default_log, fields) %}
-{% raw %}{{{% endraw %} {{ self::front_json_format(default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{% if not field.data_type.user_defined %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %},{% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_json_format(default_log=default_log) }} {% raw %}}}{% endraw %}
+{% raw %}{{{% endraw %} {{ self::front_json_format(default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{% if not field.data_type.user_defined %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_json_format(default_log=default_log) }} {% raw %}}}{% endraw %}
 {% endmacro json_format %}
+
 
 {% macro front_parameters(default_log) %}
     {% for field in default_log.front_fields %}
@@ -81,16 +91,24 @@
     {{ self::back_parameters(default_log=default_log) }}
 {% endmacro parameters %}
 
-{% macro front_arguments(default_log) %}
-{% for field in default_log.front_fields %}self.{{ field.name|snake }}{% if field.data_type.user_defined %}.to_{{format_name}}(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+{% macro field_with_escaping(field, format_name, escape) %}
+{% if field.data_type.name|snake == "string" %}{{ format_name }}::{{ escape }}(&self.{{ field.name|snake }})
+{% elif field.data_type.name|snake == "datetime" %}{{ format_name }}::{{ escape }}(&self.{{ field.name|snake }})
+{% elif field.data_type.name|snake == "timestamp" %}{{ format_name }}::{{ escape }}(&self.{{ field.name|snake }})
+{% else %}self.{{ field.name|snake }}
+{% endif %}
+{% endmacro field_with_escaping %}
+
+{% macro front_arguments(default_log, format_name, escape) %}
+{% for field in default_log.front_fields %}{{ self::field_with_escaping(field=field, format_name=format_name, escape=escape) }}{% if field.data_type.user_defined %}.to_{{ format_name }}(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro front_arguments %}
 
-{% macro back_arguments(default_log) %}
-{% for field in default_log.back_fields %}self.{{ field.name|snake }}{% if field.data_type.user_defined %}.to_{{format_name}}(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+{% macro back_arguments(default_log, format_name, escape) %}
+{% for field in default_log.back_fields %}{{ self::field_with_escaping(field=field, format_name=format_name, escape=escape) }}{% if field.data_type.user_defined %}.to_{{ format_name }}(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro back_arguments %}
 
-{% macro arguments(default_log, fields, format_name) %}
-{{ self::front_arguments(default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}self.{{ field.name|snake }}{% if field.data_type.user_defined %}.to_{{format_name}}(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments(default_log=default_log) }}
+{% macro arguments(default_log, fields, format_name, escape) %}
+{{ self::front_arguments(default_log=default_log, format_name=format_name, escape=escape) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{{ self::field_with_escaping(field=field, format_name=format_name, escape=escape) }}{% if field.data_type.user_defined %}.to_{{ format_name }}(){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments(default_log=default_log, format_name=format_name, escape=escape) }}
 {% endmacro arguments %}
 
 {% macro type_ltsv_format(fields) %}
@@ -98,11 +116,11 @@
 {% endmacro type_ltsv_format %}
 
 {% macro type_json_format(fields) %}
-{% for field in fields %}\"{{ field.name }}\":{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}\t{% endif %}{% endfor %}
+{% for field in fields %}\"{{ field.name }}\":{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro type_json_format %}
 
-{% macro type_arguments(fields) %}
-{% for field in fields %}self.{{ field.name|snake }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% macro type_arguments(fields, format_name, escape) %}
+{% for field in fields %}{{ self::field_with_escaping(field=field, format_name=format_name, escape=escape) }}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro type_arguments %}
 
 {% macro type_parameters(fields) %}

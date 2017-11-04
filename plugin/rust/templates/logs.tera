@@ -1,3 +1,8 @@
+#[allow(unused_imports)]
+use super::ltsv;
+#[allow(unused_imports)]
+use super::json;
+
 {% import "macros.tera" as macros %}{% for log in logs %}pub struct {{ log.name|upper_camel }} {
     {{ macros::parameters(default_log=default_log, fields=log.fields) }}
 }
@@ -5,12 +10,17 @@
 impl {{ log.name|upper_camel }} {
     #[allow(dead_code)]
     pub fn to_ltsv(&self) -> String {
-        format!("{{ macros::ltsv_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="ltsv") }})
+        format!("{{ macros::ltsv_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="ltsv", escape="escape") }})
     }
 
     #[allow(dead_code)]
     pub fn to_json(&self) -> String {
-        format!("{{ macros::json_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="json") }})
+        format!("{{ macros::json_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="json", escape="escape") }})
+    }
+
+    #[allow(dead_code)]
+    pub fn to_json_no_multibyte_escaping(&self) -> String {
+        format!("{{ macros::json_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="json", escape="escape_without_multibytes") }})
     }
 }
 
