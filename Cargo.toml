@@ -1,6 +1,6 @@
 [package]
 name = "logian"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["naokirin <naoki.rin186@gmail.com>"]
 
 [dependencies]
