@@ -1,26 +1,38 @@
-#[allow(unused_imports)]
+{% import "macros.tera" as macros %}#[allow(unused_imports)]
 use super::ltsv;
 #[allow(unused_imports)]
+use super::ltsv::ToLtsv;
+#[allow(unused_imports)]
 use super::json;
+#[allow(unused_imports)]
+use super::json::ToJson;
 
-{% import "macros.tera" as macros %}{% for type in types %}pub struct {{ type.name|upper_camel }} {
+{% for type in types %}#[derive(Clone)]
+pub struct {{ type.name|upper_camel }} {
     {{ macros::type_parameters(fields=type.fields) }}
 }
 
-impl {{ type.name|upper_camel }} {
+impl ToLtsv for {{ type.name|upper_camel }} {
     #[allow(dead_code)]
-    pub fn to_ltsv(&self) -> String {
-        format!("{{ macros::type_ltsv_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields, format_name="ltsv", escape="escape") }})
+    fn to_ltsv(&self) -> String {
+        format!("{{ macros::type_ltsv_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields, format_name="ltsv") }})
     }
 
     #[allow(dead_code)]
-    pub fn to_json(&self) -> String {
-        format!("{{ macros::type_json_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields, format_name="json", escape="escape") }})
+    fn to_ltsv_null() -> String {
+        format!("{{ macros::type_ltsv_format(fields=type.fields) }}", {% for field in type.fields %}"null"{% if not loop.last %}, {% endif %}{% endfor %})
+    }
+}
+
+impl ToJson for {{ type.name|upper_camel }} {
+    #[allow(dead_code)]
+    fn to_json(&self, escaping_type: &json::JsonEscapingType) -> String {
+        format!("{{ macros::type_json_format(fields=type.fields) }}", {{ macros::type_arguments_with_escaping_type(fields=type.fields, format_name="json") }})
     }
 
     #[allow(dead_code)]
-    pub fn to_json_no_multibyte_escaping(&self) -> String {
-        format!("{{ macros::type_json_format(fields=type.fields) }}", {{ macros::type_arguments(fields=type.fields, format_name="json", escape="escape_without_multibytes") }})
+    fn to_json_null() -> String {
+        format!("{{ macros::type_json_format(fields=type.fields) }}", {% for field in type.fields %}"null"{% if not loop.last %}, {% endif %}{% endfor %})
     }
 }
 
