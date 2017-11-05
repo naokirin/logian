@@ -29,7 +29,7 @@ $ logian generate default-log --front "front_column1:string, front_column2:integ
 $ logian generate type type_name column1:string column2:integer --schema_dir=./schemas
 
 # Generate rust codes for LTSV format.
-$ logian output rust_ltsv ./output_dir --schema-dir=./schemas
+$ logian output rust ./output_dir --schema-dir=./schemas
 ```
 
 For details about options, see `logian --help` command.
@@ -59,7 +59,7 @@ Limitation: a user-defined type doesn't includes a user-defined type.
 
 ### Default plugins
 
-* rust\_ltsv
+* rust
 
 ### Custom plugins
 
