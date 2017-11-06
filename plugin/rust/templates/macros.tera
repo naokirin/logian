@@ -14,7 +14,7 @@
 {% endmacro type %}
 
 {% macro front_comma(default_log, fields) %}
-{% if fields|length + default_log.back_fields|length > 0 and default_log.front_fields|length > 0 %}, {% endif %}
+{% if fields|length + default_log.back_fields|length > 0 %}, {% endif %}
 {% endmacro front_comma %}
 
 {% macro back_comma(default_log, fields) %}
@@ -22,7 +22,7 @@
 {% endmacro back_comma %}
 
 {% macro front_tab(default_log, fields) %}
-{% if fields|length + default_log.back_fields|length > 0 and default_log.front_fields|length > 0 %}\t{% endif %}
+{% if fields|length + default_log.back_fields|length > 0 %}\t{% endif %}
 {% endmacro front_tab %}
 
 {% macro back_tab(default_log, fields) %}
@@ -38,16 +38,16 @@
 {% endmacro back_newline %}
 
 
-{% macro front_ltsv_format(default_log) %}
-{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}
+{% macro front_ltsv_format(log_label, default_log) %}
+{{ log_label }}:{}{% if default_log.front_fields|length > 0 %}\t{% endif %}{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}
 {% endmacro front_ltsv_format %}
 
 {% macro back_ltsv_format(default_log) %}
 {% for field in default_log.back_fields %}{% if field.data_type.fields|length == 0 %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}
 {% endmacro back_ltsv_format %}
 
-{% macro ltsv_format(default_log, fields) %}
-{{ self::front_ltsv_format(default_log=default_log) }}{{ self::front_tab(default_log=default_log, fields=fields) }}{% for field in fields %}{% if not field.data_type.user_defined %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}{{ self::back_tab(default_log=default_log, fields=fields) }}{{ self::back_ltsv_format(default_log=default_log) }}
+{% macro ltsv_format(log_label, default_log, fields) %}
+{{ self::front_ltsv_format(log_label=log_label, default_log=default_log) }}{{ self::front_tab(default_log=default_log, fields=fields) }}{% for field in fields %}{% if not field.data_type.user_defined %}{{ field.name }}:{% endif %}{}{% if not loop.last %}\t{% endif %}{% endfor %}{{ self::back_tab(default_log=default_log, fields=fields) }}{{ self::back_ltsv_format(default_log=default_log) }}
 {% endmacro ltsv_format %}
 
 {% macro json_format_symbol(name) %}
@@ -58,16 +58,16 @@
 {% endif %}
 {% endmacro json_format_symbol %}
 
-{% macro front_json_format(default_log) %}
-{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% macro front_json_format(log_label, default_log) %}
+\"{{ log_label }}\":\"{}\"{% if default_log.front_fields|length > 0 %}, {% endif %}{% for field in default_log.front_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro front_json_format %}
 
 {% macro back_json_format(default_log) %}
 {% for field in default_log.back_fields %}{% if field.data_type.fields|length == 0 %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro back_json_format %}
 
-{% macro json_format(default_log, fields) %}
-{% raw %}{{{% endraw %} {{ self::front_json_format(default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{% if not field.data_type.user_defined %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_json_format(default_log=default_log) }} {% raw %}}}{% endraw %}
+{% macro json_format(log_label, default_log, fields) %}
+{% raw %}{{{% endraw %} {{ self::front_json_format(log_label=log_label, default_log=default_log) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}{% if not field.data_type.user_defined %}\"{{ field.name }}\": {% endif %}{{ self::json_format_symbol(name=field.data_type.name) }}{% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_json_format(default_log=default_log) }} {% raw %}}}{% endraw %}
 {% endmacro json_format %}
 
 
@@ -92,28 +92,28 @@
 {% endmacro parameters %}
 
 
-{% macro front_arguments(default_log, format_name) %}
-{% for field in default_log.front_fields %}self.{{ field.name|snake }}.to_{{ format_name }}(){% if not loop.last %}, {% endif %}{% endfor %}
+{% macro front_arguments(title, default_log, format_name) %}
+"{{ title }}"{% if default_log.front_fields|length > 0 %}, {% endif %}{% for field in default_log.front_fields %}self.{{ field.name|snake }}.to_{{ format_name }}(){% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro front_arguments %}
 
 {% macro back_arguments(default_log, format_name) %}
 {% for field in default_log.back_fields %}self.{{ field.name|snake }}.to_{{ format_name }}(){% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro back_arguments %}
 
-{% macro arguments(default_log, fields, format_name, escape) %}
-{{ self::front_arguments(default_log=default_log, format_name=format_name) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}self.{{ field.name|snake }}.to_{{ format_name }}(){% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments(default_log=default_log, format_name=format_name) }}
+{% macro arguments(title, default_log, fields, format_name, escape) %}
+{{ self::front_arguments(title=title, default_log=default_log, format_name=format_name) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}self.{{ field.name|snake }}.to_{{ format_name }}(){% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments(default_log=default_log, format_name=format_name) }}
 {% endmacro arguments %}
 
-{% macro front_arguments_with_escaping_type(default_log, format_name) %}
-{% for field in default_log.front_fields %}self.{{ field.name|snake }}.to_{{ format_name }}(escaping_type){% if not loop.last %}, {% endif %}{% endfor %}
+{% macro front_arguments_with_escaping_type(title, default_log, format_name) %}
+"{{ title }}"{% if default_log.front_fields|length > 0 %}, {% endif %}{% for field in default_log.front_fields %}self.{{ field.name|snake }}.to_{{ format_name }}(escaping_type){% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro front_arguments_with_escaping_type %}
 
 {% macro back_arguments_with_escaping_type(default_log, format_name) %}
 {% for field in default_log.back_fields %}self.{{ field.name|snake }}.to_{{ format_name }}(escaping_type){% if not loop.last %}, {% endif %}{% endfor %}
 {% endmacro back_arguments_with_escaping_type %}
 
-{% macro arguments_with_escaping_type(default_log, fields, format_name) %}
-{{ self::front_arguments_with_escaping_type(default_log=default_log, format_name=format_name) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}self.{{ field.name|snake }}.to_{{ format_name }}(escaping_type){% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments_with_escaping_type(default_log=default_log, format_name=format_name) }}
+{% macro arguments_with_escaping_type(title, default_log, fields, format_name) %}
+{{ self::front_arguments_with_escaping_type(title=title, default_log=default_log, format_name=format_name) }}{{ self::front_comma(default_log=default_log, fields=fields) }}{% for field in fields %}self.{{ field.name|snake }}.to_{{ format_name }}(escaping_type){% if not loop.last %}, {% endif %}{% endfor %}{{ self::back_comma(default_log=default_log, fields=fields) }}{{ self::back_arguments_with_escaping_type(default_log=default_log, format_name=format_name) }}
 {% endmacro arguments_with_escaping_type %}
 
 

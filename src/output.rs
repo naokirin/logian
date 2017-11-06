@@ -25,6 +25,7 @@ pub struct LogianOutput {
     pub file_suffix: String,
     pub compiled: bool,
     pub file_name_case: ::plugin::FileNameCase,
+    pub config: ::schema::config::Config,
 }
 
 impl LogianOutput {
@@ -36,7 +37,7 @@ impl LogianOutput {
         log_schemas: &LogSchemas,
         default_schema: &DefaultLogSchema
     ) {
-        let logs = renderer::render_logs(tera, LOGS_TEMPLATE, log_schemas, default_schema, types);
+        let logs = renderer::render_logs(tera, LOGS_TEMPLATE, log_schemas, default_schema, types, &self.config.log_label);
         let data_types = renderer::render_types(tera, TYPES_TEMPLATE, types);
 
         let logs_file_name = plugin::convert_case(&self.logs_file_name, &self.file_name_case);
@@ -54,7 +55,7 @@ impl LogianOutput {
         default_schema: &DefaultLogSchema,
     ) {
         for schema in log_schemas.iter() {
-            let log = renderer::render_log(tera, LOG_TEMPLATE, &schema, default_schema, types);
+            let log = renderer::render_log(tera, LOG_TEMPLATE, &schema, default_schema, types, &self.config.log_label);
             let name = plugin::convert_case(&schema.name, &self.file_name_case);
             let _ = file::write(&format!("{}/{}{}", self.output_dir, name, self.file_suffix)[..], &log[..]);
         }

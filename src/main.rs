@@ -74,6 +74,7 @@ fn main() {
     }
     else if args.is_output() {
         let param = unwrap_result(args.as_output());
+        let schema_config = schema::config::parse(&file::read(&format!("{}/schema.config", param.schema_dir)[..]).unwrap()[..]);
         let plugin_setting = unwrap_result(plugin::parse_setting(&param.plugin_dir, &param.plugin_name));
         let logian_output = output::LogianOutput {
             plugin_dir: param.plugin_dir.clone(),
@@ -85,6 +86,7 @@ fn main() {
             file_suffix: plugin_setting.file_suffix,
             compiled: plugin_setting.compiled,
             file_name_case: plugin_setting.file_name_case,
+            config: schema_config.unwrap(),
         }.output();
         if logian_output.is_err() {
             panic!(logian_output.unwrap_err());

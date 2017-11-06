@@ -16,12 +16,12 @@ use super::types::*;
 impl {{ log.name|upper_camel }} {
     #[allow(dead_code)]
     pub fn to_ltsv(&self) -> String {
-        format!("{{ macros::ltsv_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments(default_log=default_log, fields=log.fields, format_name="ltsv", escape="escape") }})
+        format!("{{ macros::ltsv_format(log_label=log_label, default_log=default_log, fields=log.fields) }}", {{ macros::arguments(title=log.name, default_log=default_log, fields=log.fields, format_name="ltsv", escape="escape") }})
     }
 
     #[allow(dead_code)]
     pub fn to_json(&self, escaping_type: &json::JsonEscapingType) -> String {
-        format!("{{ macros::json_format(default_log=default_log, fields=log.fields) }}", {{ macros::arguments_with_escaping_type(default_log=default_log, fields=log.fields, format_name="json") }})
+        format!("{{ macros::json_format(log_label=log_label, default_log=default_log, fields=log.fields) }}", {{ macros::arguments_with_escaping_type(title=log.name, default_log=default_log, fields=log.fields, format_name="json") }})
     }
 }
 

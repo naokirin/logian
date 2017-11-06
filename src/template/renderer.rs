@@ -17,8 +17,9 @@ pub fn find_templates(template_dir: &str) -> Tera {
     unwrap_result(result)
 }
 
-pub fn render_logs(tera: &Tera, template_name: &str, logs: &Vec<LogSchema>, default_log: &DefaultLogSchema, types: &Vec<DataType>) -> String {
+pub fn render_logs(tera: &Tera, template_name: &str, logs: &Vec<LogSchema>, default_log: &DefaultLogSchema, types: &Vec<DataType>, log_label: &String) -> String {
     let mut context = Context::new();
+    context.add("log_label", log_label);
     context.add("default_log", &default_log);
     context.add("logs", &logs);
     context.add("types", &types);
@@ -26,8 +27,9 @@ pub fn render_logs(tera: &Tera, template_name: &str, logs: &Vec<LogSchema>, defa
     unwrap_result(result)
 }
 
-pub fn render_log(tera: &Tera, template_name: &str, log: &LogSchema, default_log: &DefaultLogSchema, types: &Vec<DataType>) -> String {
+pub fn render_log(tera: &Tera, template_name: &str, log: &LogSchema, default_log: &DefaultLogSchema, types: &Vec<DataType>, log_label: &String) -> String {
     let mut context = Context::new();
+    context.add("log_label", log_label);
     context.add("default_log", &default_log);
     context.add("log", &log);
     context.add("types", &types);
