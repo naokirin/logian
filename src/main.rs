@@ -39,7 +39,14 @@ fn main() {
     let exe_dir = exe_path.parent().unwrap();
     let template_dir = exe_dir.clone().join("template").to_str().unwrap().to_string();
 
-    if args.is_type_generate() {
+    if args.is_init() {
+        let param = unwrap_result(args.as_init());
+        let _ = unwrap_result(create_dir_all(&format!("{}/logs", &param.schema_dir)[..]));
+        let _ = unwrap_result(create_dir_all(&format!("{}/types", &param.schema_dir)[..]));
+        let _ = unwrap_result(file::write(&format!("{}/schema.config", &param.schema_dir)[..],
+            &format!("{{\n    \"log_label\": \"{}\"\n}}\n", &param.log_label)[..]));
+    }
+    else if args.is_type_generate() {
         let param = unwrap_result(args.as_type_generate());
         let _ = unwrap_result(create_dir_all(&format!("{}/types", param.schema_dir)[..]));
         let s = unwrap_result(schema::generator::GeneratedType {

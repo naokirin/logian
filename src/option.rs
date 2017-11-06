@@ -3,6 +3,7 @@ use std::env;
 
 docopt!(pub Args derive Debug, "
 Usage:
+  logian init [--log-label=<ll>] [--schema-dir=<sd>]
   logian output <plugin> <output-dir> [--plugin-dir=<pd>] [--schema-dir=<sd>]
   logian generate (log|type) <name> [<field>...] [--comment=<cm>] [--schema-dir=<sd>]
   logian generate default-log [--front FRONT] [--back BACK] [--schema-dir=<sd>]
@@ -12,6 +13,7 @@ Usage:
 Options:
   -h --help             Show this screen.
   --version             Show version.
+  --log-label=<ll>      Set log name label [default: log].
   --plugin-dir=<pd>     Plugin directory [default: ].
   --schema-dir=<pd>     Schema directory [default: .].
   --comment=<cm>        Log schema comment [default: ].
@@ -21,6 +23,12 @@ Options:
 
 pub fn parse() -> Args {
     Args::docopt().deserialize().unwrap_or_else(|e| e.exit())
+}
+
+#[derive(Debug)]
+pub struct Init {
+    pub schema_dir: String,
+    pub log_label: String,
 }
 
 #[derive(Debug)]
@@ -61,6 +69,22 @@ pub struct GeneratedDefaultLog {
 }
 
 impl Args {
+
+    pub fn is_init(&self) -> bool {
+        self.cmd_init
+    }
+
+    pub fn as_init(&self) -> Result<Init, String> {
+        if !self.is_init() {
+            return Err("This argument is not init.".to_string());
+        }
+
+        Ok(Init {
+            schema_dir: self.flag_schema_dir.to_string(),
+            log_label: self.flag_log_label.to_string(),
+        })
+    }
+
     pub fn is_output(&self) -> bool {
         self.cmd_output
     }
