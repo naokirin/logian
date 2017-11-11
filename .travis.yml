@@ -1,6 +1,6 @@
 language: rust
 rust:
-  - nightly
+  - stable
 
 branches:
   only:
@@ -10,16 +10,16 @@ branches:
 matrix:
   include:
     - os: osx
-      rust: nightly
+      rust: stable
       env: TARGET=x86_64-apple-darwin
     - os: linux
-      rust: nightly
+      rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
     - os: linux
-      rust: nightly
+      rust: stable
       env: TARGET=i686-unknown-linux-gnu
     - os: linux
-      rust: nightly
+      rust: stable
       env: TARGET=aarch64-unknown-linux-gnu
 
 before_script:

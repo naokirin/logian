@@ -10,7 +10,6 @@ serde_json = "*"
 tera = "*"
 glob = "*"
 docopt = "*"
-docopt_macros = "*"
 fs_extra = "*"
 heck = "*"
 

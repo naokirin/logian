@@ -7,9 +7,9 @@ branches:
 
 environment:
   matrix:
-    - CHANNEL: nightly
+    - CHANNEL: stable
       TARGET: i686-pc-windows-msvc
-    - CHANNEL: nightly
+    - CHANNEL: stable
       TARGET: x86_64-pc-windows-msvc
 
 install:

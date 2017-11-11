@@ -1,7 +1,9 @@
 extern crate docopt;
+
+use self::docopt::Docopt;
 use std::env;
 
-docopt!(pub Args derive Debug, "
+const USAGE: &'static str = "
 Usage:
   logian init [--log-label=<ll>] [--schema-dir=<sd>]
   logian output <plugin> <output-dir> [--plugin-dir=<pd>] [--schema-dir=<sd>]
@@ -19,10 +21,32 @@ Options:
   --comment=<cm>        Log schema comment [default: ].
   --front FRONT         Default log schema front fields [default: ].
   --back BACK           Default log schema back fields [default: ].
-");
+";
+
+#[derive(Debug, Deserialize)]
+pub struct Args {
+    cmd_init: bool,
+    cmd_output: bool,
+    cmd_generate: bool,
+    cmd_log: bool,
+    cmd_type: bool,
+    cmd_default_log: bool,
+    arg_plugin: String,
+    arg_output_dir: String,
+    arg_name: String,
+    arg_field: Vec<String>,
+    flag_log_label: String,
+    flag_schema_dir: String,
+    flag_plugin_dir: String,
+    flag_comment: String,
+    flag_front: String,
+    flag_back: String,
+}
 
 pub fn parse() -> Args {
-    Args::docopt().deserialize().unwrap_or_else(|e| e.exit())
+    Docopt::new(USAGE)
+        .and_then(|d| d.deserialize())
+        .unwrap_or_else(|e| e.exit())
 }
 
 #[derive(Debug)]
