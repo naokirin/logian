@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/naokirin/logian.svg?branch=master)](https://travis-ci.org/naokirin/logian) [![Build status](https://ci.appveyor.com/api/projects/status/aspww5vy8oyb5vo9/branch/master?svg=true)](https://ci.appveyor.com/project/naokirin/logian/branch/master)
 
-Logian is a log output code generator (implemented in rust).  
+Logian is a log format code generator (implemented in rust).  
 
-Release Notes, see [Release page](https://github.com/naokirin/logian/releases).
+Releases, see [Release page](https://github.com/naokirin/logian/releases).
 
 ## Commands
 
@@ -13,10 +13,13 @@ Release Notes, see [Release page](https://github.com/naokirin/logian/releases).
 * log schema
 * default log schema
 * user-defined type
-* log output codes
+* log output code
 
 ```
 # Note: a type name with `?` means nullable.
+
+# Generate log schema directory
+$ logian init --log-label=log_type --schema_dir=./schemas
 
 # Generate a log schema.
 $ logian generate log log_name column1:string column2:integer? --schema_dir=./schemas
@@ -28,7 +31,7 @@ $ logian generate default-log --front "front_column1:string, front_column2:integ
 # Generate a user-defined type.
 $ logian generate type type_name column1:string column2:integer --schema_dir=./schemas
 
-# Generate rust codes for LTSV format.
+# Generate rust code.
 $ logian output rust ./output_dir --schema-dir=./schemas
 ```
 
